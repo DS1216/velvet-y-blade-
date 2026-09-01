@@ -1,27 +1,112 @@
-#container {
-  text-align: center;
+.brand-title {
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-size: 1.1rem;
 
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  .accent-amp {
+    color: var(--ion-color-secondary);
+  }
 }
 
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+.welcome-header {
+  margin-top: 10px;
+  margin-bottom: 24px;
+
+  .subtitle {
+    color: var(--ion-color-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1b1b1b;
+    margin: 0 0 6px 0;
+  }
+
+  .description {
+    color: #666666;
+    font-size: 0.95rem;
+    margin: 0;
+  }
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
+.active-ticket-card {
+  background: #1b1b1b;
+  color: #ffffff;
+  border-radius: 16px;
+  margin: 0 0 28px 0;
 
-  color: #8c8c8c;
+  .badge {
+    background: rgba(197, 160, 89, 0.2);
+    color: var(--ion-color-secondary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 6px;
+    letter-spacing: 1px;
+  }
 
-  margin: 0;
+  h2 {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin: 8px 0 2px 0;
+  }
+
+  p {
+    color: #a0a0a0;
+    font-size: 0.85rem;
+    margin: 0;
+  }
+
+  .ticket-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
 
-#container a {
-  text-decoration: none;
+.section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1b1b1b;
+  margin-bottom: 16px;
+}
+
+.service-card {
+  border-radius: 16px;
+  margin: 0 0 16px 0;
+  background: #ffffff;
+  border: 1px solid #eaeaea;
+
+  .card-overlay {
+    padding: 20px;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1b1b1b;
+    margin: 12px 0 6px 0;
+  }
+
+  p {
+    color: #666666;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--ion-color-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
 }

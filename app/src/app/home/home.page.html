@@ -1,20 +1,70 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title class="brand-title">
+      VELVET <span class="accent-amp">&</span> BLADE
     </ion-title>
+    <ion-buttons slot="end">
+      <ion-button routerLink="/profile">
+        <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
-
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+<ion-content class="ion-padding">
+  <div class="welcome-header">
+    <p class="subtitle">EXPERIENCIA INTEGRAL</p>
+    <h1>Bienvenido</h1>
+    <p class="description">Selecciona el servicio o estación que deseas agendar hoy.</p>
   </div>
+
+  <ion-card class="active-ticket-card">
+    <ion-card-content>
+      <div class="ticket-info">
+        <div>
+          <span class="badge">TURNO ACTIVO</span>
+          <h2>Sillón B-04</h2>
+          <p>Barbería de Autor • En espera</p>
+        </div>
+        <ion-button fill="clear" color="secondary" routerLink="/queue">
+          Ver Turno
+          <ion-icon slot="end" name="arrow-forward-outline"></ion-icon>
+        </ion-button>
+      </div>
+    </ion-card-content>
+  </ion-card>
+
+  <h2 class="section-title">Estaciones de Trabajo</h2>
+
+  <ion-grid class="ion-no-padding">
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <ion-card class="service-card" routerLink="/booking">
+          <div class="card-overlay">
+            <ion-chip color="secondary">Barbería</ion-chip>
+            <h3>Barbería de Autor</h3>
+            <p>Cortes de precisión, perfilado de barba con navaja y tratamientos faciales.</p>
+            <div class="card-footer">
+              <span>Ver Disponibilidad</span>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+        </ion-card>
+      </ion-col>
+
+      <ion-col size="12" size-md="6">
+        <ion-card class="service-card" routerLink="/booking">
+          <div class="card-overlay">
+            <ion-chip color="secondary">Spa de Uñas</ion-chip>
+            <h3>Spa de Uñas Premium</h3>
+            <p>Manicura rusa, pedicura spa y esmaltado permanente con acabado profesional.</p>
+            <div class="card-footer">
+              <span>Ver Disponibilidad</span>
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
 </ion-content>
