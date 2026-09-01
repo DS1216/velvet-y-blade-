@@ -1,0 +1,831 @@
+<!-- ═══════════════════════════════════════════════════════════════════
+     VELVET & BLADE — FLUJO DE AGENDAMIENTO /booking
+     Wizard de 4 pasos: Servicio → Fecha/Hora → Especialista → Confirmar
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<ion-header class="vb-header" [translucent]="true">
+  <ion-toolbar>
+
+    <!-- Botón volver -->
+    <ion-button
+      slot="start"
+      fill="clear"
+      class="vb-back-btn"
+      (click)="prevStep()"
+    >
+      <ion-icon
+        name="chevron-back-outline"
+        slot="icon-only"
+      ></ion-icon>
+    </ion-button>
+
+    <ion-title class="vb-header-title">
+      Agendar Cita
+    </ion-title>
+
+  </ion-toolbar>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       STEPPER DE PROGRESO
+       ═══════════════════════════════════════════════════════════════ -->
+
+  <div class="vb-stepper">
+
+    <!-- Barra de progreso continua -->
+    <div class="vb-progress-track">
+      <div
+        class="vb-progress-fill"
+        [style.width.%]="progressPercent"
+      ></div>
+    </div>
+
+    <!-- Pasos individuales -->
+    <div class="vb-steps-row">
+
+      <div
+        *ngFor="let step of [1, 2, 3, 4]"
+        class="vb-step"
+        [class.active]="currentStep === step"
+        [class.completed]="isStepCompleted(step)"
+        (click)="goToStep(step)"
+      >
+
+        <div class="vb-step-circle">
+
+          <ion-icon
+            *ngIf="isStepCompleted(step) && currentStep !== step"
+            name="checkmark-circle"
+            class="vb-step-check"
+          ></ion-icon>
+
+          <span
+            *ngIf="!isStepCompleted(step) || currentStep === step"
+          >
+            {{ step }}
+          </span>
+
+        </div>
+
+        <span class="vb-step-label">
+          {{ getStepLabel(step) }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</ion-header>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     CONTENIDO PRINCIPAL
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<ion-content
+  class="vb-content"
+  [fullscreen]="true"
+>
+
+  <div class="vb-scroll-container">
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PASO 1 — SELECCIÓN DE SERVICIO
+         ══════════════════════════════════════════════════════════════ -->
+
+    <section
+      *ngIf="currentStep === 1"
+      class="vb-step-section"
+      @fadeSlide
+    >
+
+      <div class="vb-section-header">
+
+        <h2 class="vb-section-title">
+          ¿Qué experiencia deseas?
+        </h2>
+
+        <p class="vb-section-sub">
+          Selecciona el servicio para tu visita
+        </p>
+
+      </div>
+
+
+      <!-- Tabs de categoría -->
+      <div class="vb-category-tabs">
+
+        <button
+          type="button"
+          class="vb-tab"
+          [class.vb-tab--active]="activeCategory === 'barberia'"
+          (click)="activeCategory = 'barberia'"
+        >
+          💈 Barbería de Autor
+        </button>
+
+        <button
+          type="button"
+          class="vb-tab"
+          [class.vb-tab--active]="activeCategory === 'spa'"
+          (click)="activeCategory = 'spa'"
+        >
+          💅 Spa de Uñas
+        </button>
+
+      </div>
+
+
+      <!-- Grid de servicios -->
+      <div class="vb-services-grid">
+
+        <div
+          *ngFor="let service of filteredServices; trackBy: trackById"
+          class="vb-service-card"
+          [class.vb-service-card--selected]="selectedService?.id === service.id"
+          (click)="selectService(service)"
+          tappable
+        >
+
+          <div class="vb-service-icon-wrap">
+
+            <ion-icon
+              [name]="service.icon"
+              class="vb-service-icon"
+            ></ion-icon>
+
+          </div>
+
+
+          <div class="vb-service-info">
+
+            <h3 class="vb-service-name">
+              {{ service.name }}
+            </h3>
+
+            <p class="vb-service-desc">
+              {{ service.description }}
+            </p>
+
+
+            <div class="vb-service-meta">
+
+              <span class="vb-service-duration">
+
+                <ion-icon name="time-outline"></ion-icon>
+
+                {{ formatDuration(service.duration) }}
+
+              </span>
+
+              <span class="vb-service-price">
+                {{ formatPrice(service.price) }}
+              </span>
+
+            </div>
+
+
+            <span
+              class="vb-station-badge"
+              [class.vb-station-badge--mesa]="service.stationType === 'mesa'"
+            >
+              {{ service.stationType === 'sillon' ? '💈 Sillón' : '💅 Mesa' }}
+            </span>
+
+          </div>
+
+
+          <!-- Check de selección -->
+          <div
+            class="vb-selected-indicator"
+            *ngIf="selectedService?.id === service.id"
+          >
+
+            <ion-icon name="checkmark-circle"></ion-icon>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PASO 2 — SELECCIÓN DE FECHA Y HORA
+         ══════════════════════════════════════════════════════════════ -->
+
+    <section
+      *ngIf="currentStep === 2"
+      class="vb-step-section"
+      @fadeSlide
+    >
+
+      <div class="vb-section-header">
+
+        <h2 class="vb-section-title">
+          ¿Cuándo te visitamos?
+        </h2>
+
+        <p class="vb-section-sub">
+          Elige tu fecha y horario preferido
+        </p>
+
+      </div>
+
+
+      <!-- Resumen del servicio elegido -->
+      <div
+        class="vb-selected-summary"
+        *ngIf="selectedService"
+      >
+
+        <ion-icon
+          [name]="selectedService.icon"
+          class="vb-summary-icon"
+        ></ion-icon>
+
+        <div>
+
+          <span class="vb-summary-name">
+            {{ selectedService.name }}
+          </span>
+
+          <span class="vb-summary-detail">
+            {{ formatDuration(selectedService.duration) }}
+            ·
+            {{ formatPrice(selectedService.price) }}
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ═══════════════════════════════════════════════════════════
+           CALENDARIO
+           ═══════════════════════════════════════════════════════════ -->
+
+      <div class="vb-calendar-wrap">
+
+        <h3 class="vb-subsection-title">
+          Selecciona la fecha
+        </h3>
+
+        <div class="vb-calendar-scroll">
+
+          <div
+            *ngFor="let day of calendarDays"
+            class="vb-day-card"
+            [class.vb-day-card--selected]="selectedDate === day.date"
+            [class.vb-day-card--disabled]="!day.available"
+            (click)="selectDate(day)"
+          >
+
+            <span class="vb-day-name">
+              {{ day.day }}
+            </span>
+
+            <span class="vb-day-number">
+              {{ day.label.split(' ')[0] }}
+            </span>
+
+            <span class="vb-day-month">
+              {{ day.label.split(' ')[1] }}
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ═══════════════════════════════════════════════════════════
+           HORARIOS
+           ═══════════════════════════════════════════════════════════ -->
+
+      <div
+        class="vb-timeslots-wrap"
+        *ngIf="selectedDate"
+      >
+
+        <div class="vb-timeslots-header">
+
+          <h3 class="vb-subsection-title">
+            Horario disponible
+          </h3>
+
+
+          <!-- Filtro por período -->
+          <div class="vb-period-filter">
+
+            <button
+              *ngFor="let p of periods"
+              type="button"
+              class="vb-period-btn"
+              [class.vb-period-btn--active]="activePeriod === p"
+              (click)="activePeriod = p"
+            >
+              {{ p === 'todos' ? 'Todos' : (p | titlecase) }}
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- Grid de horarios -->
+        <div class="vb-slots-grid">
+
+          <button
+            *ngFor="let slot of filteredTimeSlots"
+            type="button"
+            class="vb-slot"
+            [class.vb-slot--selected]="selectedTimeSlot?.time === slot.time"
+            [class.vb-slot--taken]="!slot.available"
+            [disabled]="!slot.available"
+            (click)="selectTimeSlot(slot)"
+          >
+
+            {{ slot.time }}
+
+            <span
+              *ngIf="!slot.available"
+              class="vb-slot-taken-label"
+            >
+              Ocupado
+            </span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PASO 3 — ESPECIALISTA Y ESTACIÓN
+         ══════════════════════════════════════════════════════════════ -->
+
+    <section
+      *ngIf="currentStep === 3"
+      class="vb-step-section"
+      @fadeSlide
+    >
+
+      <div class="vb-section-header">
+
+        <h2 class="vb-section-title">
+          Tu especialista y puesto
+        </h2>
+
+        <p class="vb-section-sub">
+          Elige quién te atenderá y en qué estación
+        </p>
+
+      </div>
+
+
+      <!-- ═══════════════════════════════════════════════════════════
+           ESPECIALISTAS
+           ═══════════════════════════════════════════════════════════ -->
+
+      <div class="vb-specialists-wrap">
+
+        <h3 class="vb-subsection-title">
+          Especialistas disponibles
+        </h3>
+
+
+        <div class="vb-specialists-list">
+
+          <div
+            *ngFor="let sp of filteredSpecialists; trackBy: trackById"
+            class="vb-specialist-card"
+            [class.vb-specialist-card--selected]="selectedSpecialist?.id === sp.id"
+            [class.vb-specialist-card--unavailable]="!sp.available"
+            (click)="selectSpecialist(sp)"
+          >
+
+            <!-- Avatar -->
+            <div
+              class="vb-avatar"
+              [class.vb-avatar--unavailable]="!sp.available"
+            >
+
+              {{ sp.avatar }}
+
+              <div
+                class="vb-availability-dot"
+                [class.vb-availability-dot--on]="sp.available"
+                [class.vb-availability-dot--off]="!sp.available"
+              ></div>
+
+            </div>
+
+
+            <!-- Información -->
+            <div class="vb-specialist-info">
+
+              <h4 class="vb-specialist-name">
+                {{ sp.name }}
+              </h4>
+
+              <span class="vb-specialist-role">
+                {{ sp.role }}
+              </span>
+
+
+              <div class="vb-specialist-rating">
+
+                <ion-icon
+                  name="star-outline"
+                  class="vb-star"
+                ></ion-icon>
+
+                <span>
+                  {{ sp.rating }}
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- Estado -->
+            <div class="vb-specialist-right">
+
+              <ion-badge
+                *ngIf="!sp.available"
+                color="medium"
+                class="vb-unavail-badge"
+              >
+                No disponible
+              </ion-badge>
+
+
+              <ion-icon
+                *ngIf="selectedSpecialist?.id === sp.id"
+                name="checkmark-circle"
+                class="vb-specialist-check"
+              ></ion-icon>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ═══════════════════════════════════════════════════════════
+           ESTACIONES DE TRABAJO
+           ═══════════════════════════════════════════════════════════ -->
+
+      <div
+        class="vb-stations-wrap"
+        *ngIf="selectedSpecialist"
+      >
+
+        <h3 class="vb-subsection-title">
+
+          {{
+            selectedService?.stationType === 'sillon'
+              ? '💈 Sillones'
+              : '💅 Mesas de trabajo'
+          }}
+
+        </h3>
+
+
+        <div class="vb-stations-grid">
+
+          <div
+            *ngFor="let station of filteredStations; trackBy: trackById"
+            class="vb-station-card"
+            [class.vb-station-card--selected]="selectedStation?.id === station.id"
+            [class.vb-station-card--occupied]="!station.available"
+            (click)="selectStation(station)"
+          >
+
+            <span class="vb-station-emoji">
+              {{ getStationIcon(station.type) }}
+            </span>
+
+            <span class="vb-station-label">
+              {{ station.label }}
+            </span>
+
+
+            <ion-badge
+              class="vb-station-status"
+              [color]="station.available ? 'success' : 'danger'"
+            >
+              {{ station.available ? 'Libre' : 'Ocupado' }}
+            </ion-badge>
+
+
+            <ion-icon
+              *ngIf="selectedStation?.id === station.id"
+              name="checkmark-circle"
+              class="vb-station-check"
+            ></ion-icon>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════════
+         PASO 4 — RESUMEN Y CONFIRMACIÓN
+         ══════════════════════════════════════════════════════════════ -->
+
+    <section
+      *ngIf="currentStep === 4"
+      class="vb-step-section"
+      @fadeSlide
+    >
+
+      <div class="vb-section-header">
+
+        <h2 class="vb-section-title">
+          Resumen de tu cita
+        </h2>
+
+        <p class="vb-section-sub">
+          Revisa los detalles antes de confirmar
+        </p>
+
+      </div>
+
+
+      <!-- Tarjeta de resumen -->
+      <div class="vb-summary-card">
+
+        <!-- Cabecera -->
+        <div class="vb-summary-card-header">
+
+          <ion-icon
+            [name]="selectedService?.icon ?? 'sparkles-outline'"
+            class="vb-summary-big-icon"
+          ></ion-icon>
+
+          <div>
+
+            <h3 class="vb-summary-service-name">
+              {{ selectedService?.name }}
+            </h3>
+
+            <span class="vb-summary-category">
+
+              {{
+                selectedService?.category === 'barberia'
+                  ? '💈 Barbería de Autor'
+                  : '💅 Spa de Uñas'
+              }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="vb-summary-divider"></div>
+
+
+        <!-- Filas de detalle -->
+        <div class="vb-summary-rows">
+
+          <!-- Fecha -->
+          <div class="vb-summary-row">
+
+            <span class="vb-row-label">
+
+              <ion-icon name="calendar-outline"></ion-icon>
+
+              Fecha
+
+            </span>
+
+            <span class="vb-row-value">
+              {{ selectedDate ? formatDate(selectedDate) : '' }}
+            </span>
+
+          </div>
+
+
+          <!-- Hora -->
+          <div class="vb-summary-row">
+
+            <span class="vb-row-label">
+
+              <ion-icon name="time-outline"></ion-icon>
+
+              Hora
+
+            </span>
+
+            <span class="vb-row-value">
+              {{ selectedTimeSlot?.time }}
+            </span>
+
+          </div>
+
+
+          <!-- Especialista -->
+          <div class="vb-summary-row">
+
+            <span class="vb-row-label">
+
+              <ion-icon name="person-outline"></ion-icon>
+
+              Especialista
+
+            </span>
+
+
+            <div class="vb-row-specialist">
+
+              <span class="vb-row-avatar">
+                {{ selectedSpecialist?.avatar }}
+              </span>
+
+              <div>
+
+                <span class="vb-row-value">
+                  {{ selectedSpecialist?.name }}
+                </span>
+
+                <span class="vb-row-role">
+                  {{ selectedSpecialist?.role }}
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Estación -->
+          <div class="vb-summary-row">
+
+            <span class="vb-row-label">
+
+              {{ getStationIcon(selectedStation?.type ?? 'sillon') }}
+
+              Estación
+
+            </span>
+
+            <span class="vb-row-value">
+              {{ selectedStation?.label }}
+            </span>
+
+          </div>
+
+
+          <!-- Duración -->
+          <div class="vb-summary-row">
+
+            <span class="vb-row-label">
+
+              <ion-icon name="time-outline"></ion-icon>
+
+              Duración
+
+            </span>
+
+            <span class="vb-row-value">
+
+              {{
+                formatDuration(
+                  selectedService?.duration ?? 0
+                )
+              }}
+
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="vb-summary-divider"></div>
+
+
+        <!-- Total -->
+        <div class="vb-summary-total">
+
+          <span class="vb-total-label">
+            Total a pagar
+          </span>
+
+          <span class="vb-total-amount">
+
+            {{
+              formatPrice(
+                selectedService?.price ?? 0
+              )
+            }}
+
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- Política de cancelación -->
+      <p class="vb-policy-note">
+
+        ⚠️ Puedes cancelar tu cita hasta
+        <strong>2 horas antes</strong>
+        del horario agendado sin penalidad.
+
+      </p>
+
+    </section>
+
+  </div>
+
+</ion-content>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     FOOTER — BOTÓN DE ACCIÓN
+     ═══════════════════════════════════════════════════════════════════ -->
+
+<div class="vb-footer">
+
+  <!-- Indicador de selección activa -->
+  <div
+    class="vb-footer-summary"
+    *ngIf="currentStep < 4 && selectedService"
+  >
+
+    <ion-icon
+      [name]="selectedService.icon"
+      class="vb-footer-icon"
+    ></ion-icon>
+
+    <span class="vb-footer-service">
+      {{ selectedService.name }}
+    </span>
+
+    <span class="vb-footer-price">
+      {{ formatPrice(selectedService.price) }}
+    </span>
+
+  </div>
+
+
+  <!-- Botón principal -->
+  <ion-button
+    expand="block"
+    class="vb-cta-btn"
+    [disabled]="!canAdvance || isSubmitting"
+    (click)="currentStep < 4 ? nextStep() : confirmBooking()"
+  >
+
+    <span *ngIf="!isSubmitting">
+
+      {{
+        currentStep < 4
+          ? 'Continuar'
+          : 'Confirmar Cita'
+      }}
+
+    </span>
+
+
+    <span *ngIf="isSubmitting">
+      Agendando...
+    </span>
+
+
+    <ion-icon
+      *ngIf="!isSubmitting"
+      [name]="
+        currentStep < 4
+          ? 'chevron-forward-outline'
+          : 'checkmark-circle'
+      "
+      slot="end"
+    ></ion-icon>
+
+  </ion-button>
+
+</div>
